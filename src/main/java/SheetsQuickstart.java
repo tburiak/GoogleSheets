@@ -4,12 +4,13 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SheetsQuickstart {
 
-    public static void writeDataFromDB(List<List<String>> myData, Sheets service, String spreadsheetId, String writeRange) {
+    public static void writeData(List<List<String>> myData, Sheets service, String spreadsheetId, String writeRange) {
 
         try {
             List<List<Object>> writeData = new ArrayList<>();
@@ -36,9 +37,11 @@ public class SheetsQuickstart {
         List<List<String>> body = new SQLClient(conUrl).extractDataFromDB();
 
         final String spreadsheetId = "1ouf2wg3PthmREGQQ5vP_6Jz0zBykOXQaHOW5Ig5pjjc";
-        final String range = "Sheet1!A1:P2670";
+        final String range = "Sheet1!A2:P2670";
+        final String range2 = "Sheet1!A1";
 
-        writeDataFromDB(body, service, spreadsheetId, range);
+        writeData(Arrays.asList(Arrays.asList("FAILED/BLOCKED")), service, spreadsheetId, range2);
+        writeData(body, service, spreadsheetId, range);
 
 
 //        ValueRange response = service.spreadsheets().values()

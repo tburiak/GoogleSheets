@@ -1,6 +1,5 @@
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SQLClient {
@@ -16,8 +15,7 @@ public class SQLClient {
     public List<List<String>> extractDataFromDB() {
         List<List<String>> mData = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
-        try {
-            // Load SQL Server JDBC driver and establish connection.
+        // Load SQL Server JDBC driver and establish connection.
 //            try (Connection connection = DriverManager.getConnection(connectionUrl)) {
 //                System.out.println("Done.");
 //
@@ -34,77 +32,46 @@ public class SQLClient {
 //                connection.close();
 //                System.out.println("All done.");
 //            }
-
-            System.out.print("Connecting to SQL Server ... ");
-            try (Connection connection = DriverManager.getConnection(connectionUrl)) {
-                System.out.println("Done.");
-                CallableStatement cstmt;
-                cstmt = null;
-                try {
-
-                    cstmt = connection.prepareCall("{call JavaIterationStats(?)}");
-                    cstmt.setInt("qtydays", 4);
-                    cstmt.execute();
-
-                    boolean results = cstmt.execute();
-                    int rowsAffected = 0;
-
-                    while (results || rowsAffected != -1) {
-                        if (results) {
-                            rs = cstmt.getResultSet();
-                            break;
-                        } else {
-                            rowsAffected = cstmt.getUpdateCount();
+        System.out.print("Connecting to SQL Server ... ");
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+             CallableStatement cstmt = connection.prepareCall("{call PassRateDailyReport(?, ?)}")) {
+            System.out.println("Done.");
+            cstmt.setInt("qtydays", 5);
+            cstmt.setString("typeQuery", "failed");
+            boolean results = cstmt.execute();
+            int rowsAffected = 0;
+            while (results || rowsAffected != -1) {
+                if (results) {
+                    rs = cstmt.getResultSet();
+                    break;
+                } else {
+                    rowsAffected = cstmt.getUpdateCount();
+                }
+                results = cstmt.getMoreResults();
+            }
+            if (rs != null) {
+                ResultSetMetaData columns = rs.getMetaData();
+                int i = 0;
+                while (i < columns.getColumnCount()) {
+                    i++;
+                    columnNames.add(columns.getColumnName(i));
+                }
+                while (rs.next()) {
+                    List<String> dataRow = new ArrayList<>();
+                    columnNames.forEach(column -> {
+                        try {
+                            dataRow.add(rs.getString(column).trim());
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                         }
-                        results = cstmt.getMoreResults();
-                    }
-
-                    if (rs != null) {
-                        ResultSetMetaData columns = rs.getMetaData();
-                        int i = 0;
-                        while (i < columns.getColumnCount()) {
-                            i++;
-                            columnNames.add(columns.getColumnName(i));
-                        }
-                        System.out.print("\n");
-//                        while (rs.next()) {
-//                            for (i = 0; i < columnNames.size(); i++) {
-//                                System.out.print(rs.getString(columnNames.get(i))
-//                                        + "\t");
-//
-//                            }
-//                            System.out.print("\n");
-//                        }
-                    }
-
-
-                    while (rs.next()) {
-                        List<String> dataRow = new ArrayList<>();
-                        for (int i = 0; i < columnNames.size(); i++) {
-                            dataRow.add(rs.getString(columnNames.get(i)));
-                        }
-//                        dataRow.add(rs.getString("ManualTestID"));
-//                        dataRow.add(rs.getString("Name"));
-                        mData.add(dataRow);
-                    }
-
-                    rs.close();
-                    cstmt.close();
-                    connection.close();
-
-                    System.out.println("All done.");
-                } catch (Exception e) {
-                    System.out.println();
-                    e.printStackTrace();
+                    });
+                    mData.add(dataRow);
                 }
             }
-
-        } catch (Exception e) {
-            System.out.println();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         mData.add(0, columnNames);
-//        mData.add(0, Arrays.asList("FAILED", null));
         return mData;
     }
 }
