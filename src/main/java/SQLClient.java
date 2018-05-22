@@ -7,13 +7,17 @@ public class SQLClient {
     private ResultSet rs;
     private String connectionUrl;
     private String sql;
+    private int countOfRows;
+    private int countOfColumns;
+
+    private List<List<String>> mData;
 
     public SQLClient(String connectionUrl) {
         this.connectionUrl = connectionUrl;
     }
 
-    public List<List<String>> extractDataFromDB() {
-        List<List<String>> mData = new ArrayList<>();
+    public List<List<String>> extractDataFromDB(String queryType) {
+        mData = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
         // Load SQL Server JDBC driver and establish connection.
 //            try (Connection connection = DriverManager.getConnection(connectionUrl)) {
@@ -37,7 +41,7 @@ public class SQLClient {
              CallableStatement cstmt = connection.prepareCall("{call PassRateDailyReport(?, ?)}")) {
             System.out.println("Done.");
             cstmt.setInt("qtydays", 5);
-            cstmt.setString("typeQuery", "failed");
+            cstmt.setString("typeQuery", queryType);
             boolean results = cstmt.execute();
             int rowsAffected = 0;
             while (results || rowsAffected != -1) {
@@ -73,5 +77,15 @@ public class SQLClient {
         }
         mData.add(0, columnNames);
         return mData;
+    }
+
+    public int getCountOfRows() {
+        countOfRows = this.mData.size();
+        return countOfRows;
+    }
+
+    public int getCountOfColumns() {
+        countOfColumns = this.mData.get(0).size();
+        return countOfColumns;
     }
 }
