@@ -19,23 +19,6 @@ public class SQLClient {
     public List<List<String>> extractDataFromDB(String queryType) {
         mData = new ArrayList<>();
         List<String> columnNames = new ArrayList<>();
-        // Load SQL Server JDBC driver and establish connection.
-//            try (Connection connection = DriverManager.getConnection(connectionUrl)) {
-//                System.out.println("Done.");
-//
-//                // READ demo
-//                System.out.print("Reading data from table, press ENTER to continue...");
-//                sql = "SELECT * FROM dbo.AreaPath;";
-//                try (Statement statement = connection.createStatement();
-//                     ResultSet resultSet = statement.executeQuery(sql)) {
-//                    while (resultSet.next()) {
-//                        System.out.println(
-//                                resultSet.getInt(1) + " " + resultSet.getString(2) + " " + resultSet.getString(3));
-//                    }
-//                }
-//                connection.close();
-//                System.out.println("All done.");
-//            }
         System.out.print("Connecting to SQL Server ... ");
         try (Connection connection = DriverManager.getConnection(connectionUrl);
              CallableStatement cstmt = connection.prepareCall("{call PassRateDailyReport(?, ?)}")) {

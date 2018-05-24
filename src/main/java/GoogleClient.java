@@ -91,7 +91,7 @@ public class GoogleClient {
             ValueRange vr = new ValueRange().setValues(writeData).setMajorDimension("ROWS");
             this.service.spreadsheets().values()
                     .update(spreadsheetId, writeRange, vr)
-                    .setValueInputOption("RAW")
+                    .setValueInputOption("USER_ENTERED")
                     .execute();
         } catch (Exception e) {
             // handle exception
@@ -208,6 +208,36 @@ public class GoogleClient {
         System.out.println(response.getReplies().get(0));
     }
 
+    public void setNumberFormat(Sheets service, String spreadsheetId, String sheetTitle, int columnIndex, int startRowIndex, int endRowIndex) throws IOException {
+
+        int sheetID = getSheetIDBySheetTitle(service, spreadsheetId, sheetTitle);
+        List<Request> requests = new ArrayList<>();
+        requests.add(new Request()
+                .setRepeatCell(new RepeatCellRequest()
+                        .setCell(new CellData()
+                                .setUserEnteredFormat(new CellFormat()
+                                            .setNumberFormat(new NumberFormat()
+                                                .setType("NUMBER")
+                                                .setPattern("###0")
+                                        )
+                                )
+                        )
+                        .setRange(new GridRange()
+                                .setSheetId(sheetID)
+                                .setStartRowIndex(startRowIndex)
+                                .setEndRowIndex(endRowIndex)
+                                .setStartColumnIndex(columnIndex-1)
+                                .setEndColumnIndex(columnIndex)
+                        )
+                        .setFields("*")
+                )
+        );
+
+        BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
+        BatchUpdateSpreadsheetResponse response = service.spreadsheets().batchUpdate(spreadsheetId, body).execute();
+        System.out.println(response.getReplies().get(0));
+    }
+
     public int getSheetIDBySheetTitle(Sheets service, String spreadsheetId, String sheetTitle) throws IOException {
         Spreadsheet sheetMetaData = service.spreadsheets().get(spreadsheetId).execute();
         List<Sheet> sheets = sheetMetaData.getSheets();
@@ -219,6 +249,9 @@ public class GoogleClient {
         }
         return sheetID;
     }
+
+
+
 
 
     //        ValueRange response = service.spreadsheets().values()

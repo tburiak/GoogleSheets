@@ -11,6 +11,7 @@ public class PassRateDailyReport {
 
         final String conUrl = "jdbc:sqlserver://DP996\\MSSQLSERVER16;databaseName=ResultsData;user=sa;password=1234567";
         final String spreadsheetId = "1ouf2wg3PthmREGQQ5vP_6Jz0zBykOXQaHOW5Ig5pjjc";
+//        final String spreadsheetId = "1OkekNWmvdgOseXv_dJHeKluIii_ieZIQwaXJszLgf3Q";
 
         String startRangeTitleFail;
         String startRangeTitleUpdate;
@@ -39,6 +40,7 @@ public class PassRateDailyReport {
         googleClient.setEndRange(startRangeFail, sqlClient.getCountOfColumns(), sqlClient.getCountOfRows());
         endRangeFail = googleClient.getEndRange();
         rangeForFailed = googleClient.getRange(sheetTitle, startRangeFail, endRangeFail);
+
         googleClient.writeData(bodyFail, spreadsheetId, rangeForFailed);
 
         List<List<String>> bodyUpd = sqlClient.extractDataFromDB("upd");
